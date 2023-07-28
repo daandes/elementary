@@ -160,7 +160,7 @@ class Config:
         )
         self.az_bucket_name = self._first_not_none(
             az_bucket_name,
-            azure_config.get("az_blob_container_name")
+            azure_config.get("az_bucket_name")
         )
         self.az_storage_account_key = az_storage_account_key
 
@@ -218,7 +218,7 @@ class Config:
     #hasblob?
     @property
     def has_az(self):
-        return self.az_blob_container_name
+        return self.az_bucket_name
 
     def validate_monitor(self):
         self._validate_timezone()
