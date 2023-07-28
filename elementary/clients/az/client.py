@@ -54,7 +54,7 @@ class AZClient:
             if not static_website_properties.enabled:
             # if not properties.static_website.enabled:
                  raise Exception("Static website is not enabled on this blob")
-            
+            # use bucket_report_path (?)
             self.client.set_service_properties(
                 static_website_properties={"index_document": "elementary_report.html"}
             )
