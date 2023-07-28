@@ -43,7 +43,28 @@ class AZClient:
         logger.info("Uploaded report to AZ.")    
 
         # TODO:
+        # implement update_bucket_website logic
+        # set the index_document from object StaticWebsite
+        # see https://azuresdkdocs.blob.core.windows.net/$web/python/azure-storage-blob/12.17.0/azure.storage.blob.html#azure.storage.blob.StaticWebsite
         if self.config.update_bucket_website:
-            pass
+            # Check if the static website hosting is enabled for this storage account
+            properties = self.client.get_service_properties()
+            static_website_properties = properties['static_website']
+            print(static_website_properties.enabled)
+            if not static_website_properties.enabled:
+            # if not properties.static_website.enabled:
+                 raise Exception("Static website is not enabled on this blob")
+            
+            self.client.set_service_properties(
+                static_website_properties={"index_document": "elementary_report.html"}
+            )
+            #self.blob_service_client.get_blob_client("$web", remote_blob_path)
 
         return True, bucket_website_url
+    
+    def get_bucket_website_url(self, blob_path: str) -> str:
+        try:
+            return f"https://{self.config.az_storage_account_name}.<zone>.web.core.windows.net/{blob_path}"
+        except Exception as e:
+            self.logger.error(f"Failed to get bucket website URL: {e}")
+            return None
