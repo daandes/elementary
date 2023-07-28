@@ -418,6 +418,25 @@ def report(
 
 @monitor.command()
 @common_options(Command.SEND_REPORT)
+#Blob
+@click.option(
+    "--az-storage-account-name",
+    type=str,
+    default=None,
+    help="",
+)
+@click.option(
+    "--az-storage-account-key",
+    type=str,
+    default=None,
+    help="",
+)
+@click.option(
+    "--az_bucket_name",
+    type=str,
+    default=None,
+    help="",
+)
 @click.option(
     "--slack-file-name",
     type=str,
@@ -539,6 +558,10 @@ def send_report(
     google_service_account_path,
     google_project_name,
     gcs_bucket_name,
+    #blob
+    az_storage_account_name,
+    az_storage_account_key,
+    az_bucket_name,
     exclude_elementary_models,
     disable_samples,
     project_name,
@@ -572,6 +595,10 @@ def send_report(
         google_service_account_path=google_service_account_path,
         google_project_name=google_project_name,
         gcs_bucket_name=gcs_bucket_name,
+        #blob
+        az_storage_account_name=az_storage_account_name,
+        az_storage_account_key=az_storage_account_key,
+        az_bucket_name=az_bucket_name,
         slack_report_url=slack_report_url,
         env=env,
     )

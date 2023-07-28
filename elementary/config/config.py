@@ -15,6 +15,8 @@ class Config:
     _SLACK = "slack"
     _AWS = "aws"
     _GOOGLE = "google"
+    #blob
+    _AZURE = "azure"
     _CONFIG_FILE_NAME = "config.yml"
 
     # Quoting env vars
@@ -55,6 +57,11 @@ class Config:
         s3_bucket_name: Optional[str] = None,
         google_project_name: Optional[str] = None,
         google_service_account_path: Optional[str] = None,
+        #blob
+        az_storage_account_name: Optional[str] = None,
+        az_storage_account_key: Optional[str] = None,
+        #az_blob_container_name: Optional[str] = None,
+        az_bucket_name: Optional[str] = None,
         gcs_bucket_name: Optional[str] = None,
         slack_report_url: Optional[str] = None,
         env: str = "dev",
@@ -91,6 +98,7 @@ class Config:
             config.get("timezone"),
         )
 
+        #Slack
         slack_config = config.get(self._SLACK, {})
         self.slack_webhook = self._first_not_none(
             slack_webhook,
@@ -114,6 +122,7 @@ class Config:
             GroupingType.BY_ALERT.value,
         )
 
+        #AWS
         aws_config = config.get(self._AWS, {})
         self.aws_profile_name = self._first_not_none(
             aws_profile_name,
@@ -128,6 +137,7 @@ class Config:
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
 
+        #Google
         google_config = config.get(self._GOOGLE, {})
         self.google_project_name = self._first_not_none(
             google_project_name,
@@ -141,10 +151,26 @@ class Config:
             gcs_bucket_name,
             google_config.get("gcs_bucket_name"),
         )
+
+        #Azure blob
+        azure_config = config.get(self._AZURE, {})
+        self.az_storage_account_name = self._first_not_none(
+            az_storage_account_name,
+            azure_config.get("az_storage_account_name")
+        )
+        self.az_bucket_name = self._first_not_none(
+            az_bucket_name,
+            azure_config.get("az_blob_container_name")
+        )
+        self.az_storage_account_key = az_storage_account_key
+
+        #Slack?
         self.slack_report_url = self._first_not_none(
             slack_report_url,
             aws_config.get("slack_report_url"),
             google_config.get("slack_report_url"),
+            azure_config.get("slack_report_url"),
+            #blob? how to implement?
         )
 
         self.anonymous_tracking_enabled = config.get("anonymous_usage_tracking", True)
@@ -163,6 +189,8 @@ class Config:
             (self.slack_token and self.slack_channel_name)
             or self.has_s3
             or self.has_gcs
+            or self.has_az
+            #Hasblob?
         )
 
     @property
@@ -186,6 +214,11 @@ class Config:
     @property
     def has_gcs(self):
         return self.gcs_bucket_name and self.has_gcloud
+    
+    #hasblob?
+    @property
+    def has_az(self):
+        return self.az_blob_container_name
 
     def validate_monitor(self):
         self._validate_timezone()
@@ -197,7 +230,7 @@ class Config:
     def validate_send_report(self):
         if not self.has_send_report_platform:
             raise InvalidArgumentsError(
-                "You must provide a platform to upload the report to (Slack token / S3 / GCS)."
+                "You must provide a platform to upload the report to (Slack token / S3 / GCS / AZ)."
             )
 
     def _validate_timezone(self):
